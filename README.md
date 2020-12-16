@@ -21,7 +21,7 @@ This repo includes a `.env` file to tell the CLI where to find the file with the
 
 ## Considerations
 
-***aliases***
+**aliases**
 
 Before being able to configure redirections to a different address it has to be verified, or else the sync will error. To do so you have to manually trigger the creation of a workflow setting a redirect to this address:
 
