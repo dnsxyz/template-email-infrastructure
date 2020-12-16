@@ -1,0 +1,146 @@
+version: "0.1"
+addresses:
+  # top level account address
+  # username@mailscript.com
+  address@mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  # individual addresses
+  name@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  # shared addresses
+  contact@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  support@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  team@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  # handy/util addresses
+  info@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+  noreply@address.mailscript.com:
+    keys:
+      - name: owner
+        read: true
+        write: true
+# accessories
+# these are required to add workflows with addresses
+# there should be a 1-1 reference to existing addresses
+accessories:
+  # top level
+  - name: address@mailscript.com
+    type: mailscript-email
+    key: owner
+    address: address@mailscript.com
+  # individual
+  - name: name@address.mailscript.com
+    type: mailscript-email
+    address: name@address.mailscript.com
+    key: owner
+  # shared
+  - name: contact@address.mailscript.com
+    type: mailscript-email
+    address: contact@address.mailscript.com
+    key: owner
+  - name: support@address.mailscript.com
+    type: mailscript-email
+    address: support@address.mailscript.com
+    key: owner
+  - name: team@address.mailscript.com
+    type: mailscript-email
+    address: team@address.mailscript.com
+    key: owner
+  # utils
+  - name: info@address.mailscript.com
+    type: mailscript-email
+    address: info@address.mailscript.com
+    key: owner
+  - name: noreply@address.mailscript.com
+    type: mailscript-email
+    address: noreply@address.mailscript.com
+    key: owner
+# workflows
+# trigger -> action
+workflows:
+  # shared redirects
+  # post to external chats (eg discord)
+  # team
+  - name: team to external address
+    trigger:
+      accessory: team@address.mailscript.com
+      config:
+        criterias: []
+    actions:
+      - accessory: team@address.mailscript.com
+        config:
+          alias: external@address.com
+          type: alias
+  - name: team to discord#team-emails
+    trigger:
+      accessory: team@address.mailscript.com
+      config:
+        criterias: []
+    actions:
+      - config:
+          type: webhook
+          opts:
+            headers:
+              Content-Type: application/json
+            method: POST
+          url: >-
+            http://discord.channel-team.webhook.url
+          body: '{"content": "A new email for the team: {{msg.subject}}"}'
+  # contact
+  - name: contact to external address
+    trigger:
+      accessory: contact@address.mailscript.com
+      config:
+        criterias: []
+    actions:
+      - accessory: contact@address.mailscript.com
+        config:
+          alias: address@external.com
+          type: alias
+  # support
+  - name: support to external address
+    trigger:
+      accessory: support@address.mailscript.com
+      config:
+        criterias: []
+    actions:
+      - accessory: support@address.mailscript.com
+        config:
+          alias: external@address.com
+          type: alias
+  - name: support to discord#support
+    trigger:
+      accessory: support@address.mailscript.com
+      config:
+        criterias: []
+    actions:
+      - config:
+          type: webhook
+          url: >-
+            http://discord.channel-support.webhook.url
+          body: '{"content": "A new email for supoprt: {{msg.subject}}"}'
+          opts:
+            headers:
+              Content-Type: application/json
+            method: POST
