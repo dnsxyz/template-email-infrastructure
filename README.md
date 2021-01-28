@@ -9,6 +9,8 @@ The two important files are `config.yml` and `deploy.yml`.
 - `config.yml` defines the Mailscript setup
 - `deploy.yml` defines a GitHub action to sync changes to the Mailscript's db whenever it is run.
 
+The config.yml contains the variables `$username`, which will substitute you mailscript username (i.e. <username>@mailscript.com), and `$account-email-address` which will substitute the email address used when signing up to mailscript. Replace the `$account-email-address` variable if you would like to use a different address.
+
 We recommend using the `deploy.yml` file in a GitHub action when changes are pushed to a repo's `main` branch.
 
 ## API_KEY
