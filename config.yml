@@ -1,146 +1,84 @@
-version: "0.1"
+version: "0.2"
 addresses:
   # top level account address
   # username@mailscript.com
-  address@mailscript.com:
+  $username@mailscript.com:
     keys:
       - name: owner
         read: true
         write: true
+
   # individual addresses
-  name@address.mailscript.com:
-    keys:
-      - name: owner
-        read: true
-        write: true
+  # alice.smith@$username.mailscript.com:
+  #   keys:
+  #     - name: owner
+  #       read: true
+  #       write: true
+
   # shared addresses
-  contact@address.mailscript.com:
+  team@$username.mailscript.com:
     keys:
       - name: owner
         read: true
         write: true
-  support@address.mailscript.com:
+  contact@$username.mailscript.com:
     keys:
       - name: owner
         read: true
         write: true
-  team@address.mailscript.com:
+  support@$username.mailscript.com:
     keys:
       - name: owner
         read: true
         write: true
-  # handy/util addresses
-  info@address.mailscript.com:
-    keys:
-      - name: owner
-        read: true
-        write: true
-  noreply@address.mailscript.com:
-    keys:
-      - name: owner
-        read: true
-        write: true
-# accessories
-# these are required to add workflows with addresses
-# there should be a 1-1 reference to existing addresses
-accessories:
-  # top level
-  - name: address@mailscript.com
+actions:
+  - name: email-alias-to-me
     type: mailscript-email
-    key: owner
-    address: address@mailscript.com
-  # individual
-  - name: name@address.mailscript.com
-    type: mailscript-email
-    address: name@address.mailscript.com
-    key: owner
-  # shared
-  - name: contact@address.mailscript.com
-    type: mailscript-email
-    address: contact@address.mailscript.com
-    key: owner
-  - name: support@address.mailscript.com
-    type: mailscript-email
-    address: support@address.mailscript.com
-    key: owner
-  - name: team@address.mailscript.com
-    type: mailscript-email
-    address: team@address.mailscript.com
-    key: owner
-  # utils
-  - name: info@address.mailscript.com
-    type: mailscript-email
-    address: info@address.mailscript.com
-    key: owner
-  - name: noreply@address.mailscript.com
-    type: mailscript-email
-    address: noreply@address.mailscript.com
-    key: owner
+    config:
+      type: alias
+      alias: $account-email-address
+  - name: send-to-team-discord
+    type: webhook
+    config:
+      opts:
+        headers:
+          Content-Type: application/json
+        method: POST
+      url: >-
+        http://discord.channel-team.webhook.url
+      body: '{"content": "A new email for the team: {{msg.subject}}"}'
+  - name: send-to-support-discord
+    type: webhook
+    config:
+      opts:
+        headers:
+          Content-Type: application/json
+        method: POST
+      url: >-
+        http://discord.channel-support.webhook.url
+      body: '{"content": "A new email for support: {{msg.subject}}"}'
 # workflows
-# trigger -> action
+# input address -> action
 workflows:
   # shared redirects
   # post to external chats (eg discord)
   # team
-  - name: team to external address
-    trigger:
-      accessory: team@address.mailscript.com
-      config:
-        criterias: []
-    actions:
-      - accessory: team@address.mailscript.com
-        config:
-          alias: external@address.com
-          type: alias
+  - name: team to personal address
+    input: team@$username.mailscript.com
+    action: email-alias-to-me
   - name: team to discord#team-emails
-    trigger:
-      accessory: team@address.mailscript.com
-      config:
-        criterias: []
-    actions:
-      - config:
-          type: webhook
-          opts:
-            headers:
-              Content-Type: application/json
-            method: POST
-          url: >-
-            http://discord.channel-team.webhook.url
-          body: '{"content": "A new email for the team: {{msg.subject}}"}'
+    input: team@$username.mailscript.com
+    action: send-to-team-discord
+
   # contact
-  - name: contact to external address
-    trigger:
-      accessory: contact@address.mailscript.com
-      config:
-        criterias: []
-    actions:
-      - accessory: contact@address.mailscript.com
-        config:
-          alias: address@external.com
-          type: alias
+  - name: contact to personal address
+    input: contact@$username.mailscript.com
+    action: email-alias-to-me
+
   # support
-  - name: support to external address
-    trigger:
-      accessory: support@address.mailscript.com
-      config:
-        criterias: []
-    actions:
-      - accessory: support@address.mailscript.com
-        config:
-          alias: external@address.com
-          type: alias
+  - name: support to personal address
+    input: support@$username.mailscript.com
+    action: email-alias-to-me
   - name: support to discord#support
-    trigger:
-      accessory: support@address.mailscript.com
-      config:
-        criterias: []
-    actions:
-      - config:
-          type: webhook
-          url: >-
-            http://discord.channel-support.webhook.url
-          body: '{"content": "A new email for supoprt: {{msg.subject}}"}'
-          opts:
-            headers:
-              Content-Type: application/json
-            method: POST
+    input: support@$username.mailscript.com
+    action: send-to-support-discord
